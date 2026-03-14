@@ -1,4 +1,5 @@
 import io
+import re
 from typing import Literal
 
 import filetype
@@ -28,6 +29,36 @@ def pdf_to_image(data: bytes) -> bytes:
     jpeg_bytes = pix.tobytes("jpeg")
     doc.close()
     return jpeg_bytes
+
+
+def extract_pdf_text(data: bytes) -> str | None:
+    """Extract and clean text from a searchable PDF.
+
+    Returns the cleaned text string when the PDF contains selectable text,
+    or None when it is a scanned / image-only PDF (too little text found).
+    Cleaning steps:
+      • strip non-printable control characters
+      • collapse runs of horizontal whitespace to a single space
+      • collapse 3+ consecutive blank lines to 2
+    """
+    doc = fitz.open(stream=data, filetype="pdf")
+    pages = [str(page.get_text()) for page in doc]
+    doc.close()
+
+    raw = "\n".join(pages)
+
+    # Remove non-printable control characters (keep tab, newline)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", raw)
+    # Collapse runs of spaces/tabs to a single space
+    text = re.sub(r"[^\S\n]+", " ", text)
+    # Collapse 3+ consecutive blank lines to 2
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = text.strip()
+
+    # Fewer than 100 characters of real text → treat as scanned/image PDF
+    if len(text) < 100:
+        return None
+    return text
 
 
 def normalize_image(data: bytes) -> bytes:

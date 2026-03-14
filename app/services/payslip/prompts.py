@@ -7,6 +7,18 @@ CHAT_FOLLOW_UP_PROMPT = (
     "Keep the reply short and easy to read."
 )
 
+# Prepended to SALARY_PROMPT when the input is extracted PDF text instead of an image.
+# Usage: SALARY_TEXT_PROMPT.replace("__PAYSLIP_TEXT__", extracted_text)
+_SALARY_TEXT_HEADER = """\
+The following text was extracted directly from a searchable salary slip PDF.
+Use this data to perform your analysis — do not try to interpret an image.
+
+--- EXTRACTED PAYSLIP TEXT ---
+__PAYSLIP_TEXT__
+--- END EXTRACTED TEXT ---
+
+"""
+
 SALARY_PROMPT = """
 You are SalaryBuddy — a friendly assistant that helps Indian employees truly understand their payslips.
 
@@ -236,3 +248,8 @@ RETURN JSON IN THIS EXACT STRUCTURE
 "followup": "One simple question to continue helping the user."
 }
 """
+
+# Text-based prompt: header (with extracted text) + the same JSON instructions.
+# Used when the PDF is searchable so we skip image conversion entirely.
+# Usage: SALARY_TEXT_PROMPT.format(text=extracted_text)
+SALARY_TEXT_PROMPT = _SALARY_TEXT_HEADER + SALARY_PROMPT
