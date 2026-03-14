@@ -1,4 +1,4 @@
-from app.services.pii_scrubber import scrub
+from app.services.security.pii_scrubber import scrub
 
 
 def test_pan_is_redacted():

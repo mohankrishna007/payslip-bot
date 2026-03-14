@@ -1,14 +1,21 @@
 import io
 from typing import Literal
 
+import filetype
 import fitz  # PyMuPDF
 from fastapi import HTTPException
 from PIL import Image
 
 
 def detect_file_type(data: bytes) -> Literal["image", "pdf"]:
-    """Detect whether bytes represent a PDF or an image."""
-    if data[:4] == b"%PDF":
+    """Detect whether bytes represent a PDF or an image.
+
+    Uses the filetype library to inspect the file signature (magic bytes)
+    rather than only checking the first 4 bytes, covering edge cases like
+    linearised PDFs and non-standard headers.
+    """
+    kind = filetype.guess(data)
+    if kind is not None and kind.mime == "application/pdf":
         return "pdf"
     return "image"
 
@@ -24,18 +31,13 @@ def pdf_to_image(data: bytes) -> bytes:
 
 
 def normalize_image(data: bytes) -> bytes:
-    """Convert any PIL-readable image format (PNG, WebP, etc.) to JPEG bytes."""
+    """Convert any PIL-readable image to JPEG bytes, stripping all EXIF metadata.
+
+    Re-encoding via PIL without an explicit ``exif`` parameter drops all
+    metadata (GPS, device info, etc.) automatically.
+    """
     img = Image.open(io.BytesIO(data)).convert("RGB")
     buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=90)
-    return buf.getvalue()
-
-
-def strip_exif(data: bytes) -> bytes:
-    """Remove all EXIF metadata (GPS, device info) from a JPEG image."""
-    img = Image.open(io.BytesIO(data)).convert("RGB")
-    buf = io.BytesIO()
-    # Saving without passing exif= strips all metadata
     img.save(buf, format="JPEG", quality=90)
     return buf.getvalue()
 

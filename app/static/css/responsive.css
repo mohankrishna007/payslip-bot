@@ -1,0 +1,30 @@
+/* ── Tablet: hide sidebar, show WhatsApp toggle ──────────────────── */
+@media (max-width: 1024px) {
+  body        { padding: 10px; }
+  #shell      { height: calc(100dvh - 20px); border-radius: var(--r-lg); }
+  #qr-panel   { display: none; }
+  #chat-panel { flex: 1; border-right: none; }
+  #wa-toggle  { display: flex; }
+}
+
+/* ── Large mobile: wider bubbles, tighter feed padding ───────────── */
+@media (max-width: 768px) {
+  body         { padding: 0; }
+  #shell       { height: 100dvh; border-radius: 0; }
+  .bubble-wrap { max-width: 86%; }
+  #messages    { padding: 16px 16px 10px; gap: 12px; }
+}
+
+/* ── Small mobile: touch-size targets, prevent iOS zoom-on-focus ─── */
+@media (max-width: 480px) {
+  .brand-copy small { display: none; }
+  .bubble-wrap      { max-width: 92%; }
+  .bubble           { font-size: 13.5px; padding: 9px 13px 8px; }
+  #messages         { padding: 12px 12px 8px; gap: 10px; }
+  #input-bar        { padding: 10px 12px; gap: var(--gap-sm); }
+  .ibtn             { width: 44px; height: 44px; }
+  /* font-size ≥ 16px stops iOS from zooming the viewport on textarea focus */
+  #msg-input        { font-size: 16px; min-height: 44px; }
+  .nums-block       { font-size: 13px; }
+  .qr-sheet         { padding: 10px 16px 28px; }
+}

@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
-
-from app.services.pii_scrubber import scrub
+from datetime import datetime, timedelta, timezone
 
 _TTL_HOURS = 24
 
@@ -9,10 +7,13 @@ _store: dict[str, dict] = {}
 
 
 def set_session(user_id: str, analysis_text: str) -> None:
-    """Store a PII-scrubbed analysis for the user, overwriting any previous entry."""
+    """Store an analysis for the user, overwriting any previous entry.
+
+    Callers are responsible for scrubbing PII before passing *analysis_text*.
+    """
     _store[user_id] = {
-        "analysis": scrub(analysis_text),
-        "expires_at": datetime.utcnow() + timedelta(hours=_TTL_HOURS),
+        "analysis": analysis_text,
+        "expires_at": datetime.now(tz=timezone.utc) + timedelta(hours=_TTL_HOURS),
     }
 
 
@@ -21,7 +22,7 @@ def get_session(user_id: str) -> str | None:
     entry = _store.get(user_id)
     if entry is None:
         return None
-    if datetime.utcnow() > entry["expires_at"]:
+    if datetime.now(tz=timezone.utc) > entry["expires_at"]:
         del _store[user_id]
         return None
     return entry["analysis"]

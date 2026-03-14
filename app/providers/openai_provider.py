@@ -28,3 +28,10 @@ class OpenAIProvider(LLMProvider):
             ],
         )
         return response.choices[0].message.content
+
+    async def chat(self, prompt: str) -> str:
+        response = await self._client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.choices[0].message.content

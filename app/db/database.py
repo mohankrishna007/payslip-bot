@@ -49,13 +49,4 @@ async def log_slip_event(user_id: str, provider_used: str, language: str) -> Non
         await db.commit()
 
 
-async def get_history(user_id: str, limit: int = 10) -> list[dict]:
-    async with aiosqlite.connect(settings.sqlite_path) as db:
-        db.row_factory = aiosqlite.Row
-        async with db.execute(
-            "SELECT id, user_id, processed_at, provider_used, language "
-            "FROM slip_events WHERE user_id = ? ORDER BY processed_at DESC LIMIT ?",
-            (user_id, limit),
-        ) as cursor:
-            rows = await cursor.fetchall()
-    return [dict(row) for row in rows]
+

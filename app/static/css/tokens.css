@@ -1,0 +1,53 @@
+/* ── Reset ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design tokens ───────────────────────────────────────────────────── */
+:root {
+  /* Brand colours */
+  --brand:      #4f46e5;
+  --brand-dark: #1e1b4b;
+  --brand-mid:  #2e2783;
+  --accent:     #f59e0b;
+
+  /* Surfaces & text */
+  --bg:       #f1f5f9;
+  --chat-bg:  #eaecf2;
+  --surface:  #ffffff;
+  --border:   #dde3ed;
+  --text:     #0f172a;
+  --muted:    #64748b;
+
+  /* Bubble colours */
+  --user-bub: #ddd6fe;
+  --user-txt: #312e81;
+
+  /* Highlight colours */
+  --tip-bg:  #fefce8;
+  --tip-bd:  #d97706;
+  --warn-bg: #fff7ed;
+  --warn-bd: #ea580c;
+
+  /* Layout */
+  --nav-h: 58px;
+
+  /* Spacing scale */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 12px;
+  --gap-lg: 16px;
+  --gap-xl: 24px;
+
+  /* Radius scale */
+  --r-sm: 3px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 10px;
+
+  /* Gradients */
+  --nav-gradient:      linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+  --body-gradient:     linear-gradient(145deg, #1e1b4b 0%, #312e81 55%, #0f172a 100%);
+  --user-bub-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+
+  /* Shadows */
+  --shadow-shell: 0 32px 80px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.25);
+}

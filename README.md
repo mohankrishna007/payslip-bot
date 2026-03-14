@@ -1,20 +1,10 @@
-# SalaryBot
+# SalaryBuddy
 
-AI-powered salary slip explainer — FastAPI backend with LLaVA vision model.
+AI-powered payslip explainer — FastAPI backend with Gemini / OpenAI vision models.
 
 ## Prerequisites
 
-### 1. Install Ollama
-
-Download and install Ollama from https://ollama.com/download, then pull the default model:
-
-```bash
-ollama pull llava:7b
-```
-
-This downloads ~4 GB once. Ollama must be running before starting the server.
-
-### 2. Python environment
+### 1. Python environment
 
 Requires Python 3.10+.
 
@@ -28,25 +18,30 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configuration
+### 2. Configuration
 
-Copy `.env.example` to `.env` and fill in any optional keys:
+Copy `.env.example` to `.env` and fill in your keys:
 
 ```bash
-cp .env.example .env
+cp .env.example .env   # macOS / Linux
+copy .env.example .env  # Windows
 ```
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM_PROVIDER` | `ollama` | Active provider: `ollama` \| `mock` \| `gemini` \| `openai` |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `llava:7b` | Ollama vision model tag |
-| `GEMINI_API_KEY` | _(empty)_ | Required when `LLM_PROVIDER=gemini` |
-| `OPENAI_API_KEY` | _(empty)_ | Required when `LLM_PROVIDER=openai` |
+| `LLM_PROVIDER` | `gemini` | Active provider: `gemini` \| `openai` |
+| `GEMINI_API_KEY` | _(required for gemini)_ | Google AI Studio API key |
+| `GEMINI_MODEL` | `gemini-2.0-flash-lite` | Gemini model name |
+| `OPENAI_API_KEY` | _(required for openai)_ | OpenAI API key |
+| `OPENAI_MODEL` | `gpt-5-nano` | OpenAI model name |
 | `SQLITE_PATH` | `./salarybot.db` | SQLite database file path |
 | `MAX_REQUESTS_PER_DAY` | `10` | Per-user daily rate limit |
+| `WA_PHONE_NUMBER_ID` | _(optional)_ | Meta WhatsApp phone number ID |
+| `WA_ACCESS_TOKEN` | _(optional)_ | Meta WhatsApp access token |
+| `WA_VERIFY_TOKEN` | _(optional)_ | Webhook verification secret |
+| `WA_API_VERSION` | `v19.0` | Meta Graph API version |
 
-Set `LLM_PROVIDER=mock` to run the full pipeline without Ollama (useful for CI/CD or quick tests).
+WhatsApp variables are only needed when using the `/webhook` endpoints. Leave them blank to run in web-chat-only mode.
 
 ## Running the server
 
@@ -54,11 +49,12 @@ Set `LLM_PROVIDER=mock` to run the full pipeline without Ollama (useful for CI/C
 uvicorn app.main:app --reload
 ```
 
-Open the interactive API docs at http://localhost:8000/docs.
+Open **http://localhost:8000** for the chat UI, or **/docs** for the API explorer.
 
 ## Health check
 
 ```
 GET /health
-→ {"status": "ok", "provider": "ollama"}
+→ {"status": "ok", "provider": "gemini"}
 ```
+

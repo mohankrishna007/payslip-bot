@@ -5,11 +5,10 @@ import pytest
 from fastapi import HTTPException
 from PIL import Image
 
-from app.services.file_handler import (
+from app.services.payslip.file_handler import (
     detect_file_type,
     normalize_image,
     pdf_to_image,
-    strip_exif,
     validate_image_size,
 )
 
@@ -70,9 +69,10 @@ def test_normalize_jpeg_stays_jpeg():
     assert img.format == "JPEG"
 
 
-def test_strip_exif_produces_valid_jpeg():
+def test_normalize_image_strips_exif():
+    """normalize_image re-encodes as JPEG without metadata, stripping all EXIF."""
     jpeg_with_exif = _make_jpeg()
-    result = strip_exif(jpeg_with_exif)
+    result = normalize_image(jpeg_with_exif)
     img = Image.open(io.BytesIO(result))
     assert img.format == "JPEG"
     # PIL ExifTags should be empty after stripping

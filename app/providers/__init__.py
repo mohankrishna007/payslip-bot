@@ -5,10 +5,6 @@ def get_provider(name: str) -> LLMProvider:
     """Return the LLMProvider instance for the given provider name."""
     name = name.lower()
 
-    if name == "mock":
-        from app.providers.mock_provider import MockProvider
-        return MockProvider()
-
     if name == "gemini":
         from app.providers.gemini import GeminiProvider
         return GeminiProvider()
@@ -18,6 +14,5 @@ def get_provider(name: str) -> LLMProvider:
         return OpenAIProvider()
 
     raise ValueError(
-        f"Unknown LLM provider '{name}'. "
-        "Valid values: mock, gemini, openai"
+        f"Unknown LLM provider '{name}'. Valid values: gemini, openai"
     )
