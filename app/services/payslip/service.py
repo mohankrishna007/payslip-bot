@@ -10,10 +10,10 @@ from app.config import settings
 from app.db.database import log_slip_event
 from app.providers import get_provider
 from app.services.conversation.state import State, set_state
-from app.services.payslip.file_handler import compress_for_llm, detect_file_type, normalize_image, pdf_to_image
+from app.services.payslip.file_handler import compress_for_llm, detect_file_type, extract_pdf_text, normalize_image, pdf_to_image
 from app.services.payslip.json_parser import extract_json
 from app.services.payslip.formatter import format_analysis
-from app.services.payslip.prompts import SALARY_PROMPT
+from app.services.payslip.prompts import SALARY_PROMPT, SALARY_TEXT_PROMPT
 from app.services.security.pii_scrubber import scrub
 from app.services.security.rate_limiter import check_and_increment
 from app.services.session.store import set_session
@@ -63,18 +63,34 @@ async def process_payslip(user_id: str, data: bytes, language: str = "en") -> Pa
     if len(data) / (1024 * 1024) > _MAX_FILE_MB:
         raise FileTooLargeError
 
+    # ── Determine input modality ───────────────────────────────────────────
+    pdf_text: str | None = None
     file_type = detect_file_type(data)
+
     if file_type == "pdf":
-        data = pdf_to_image(data)
-    data = normalize_image(data)
-    data = compress_for_llm(data)
+        pdf_text = extract_pdf_text(data)          # None → scanned/image PDF
+        if pdf_text is None:
+            # Scanned PDF — fall back to image pipeline
+            data = pdf_to_image(data)
+            data = normalize_image(data)
+            data = compress_for_llm(data)
+    else:
+        data = normalize_image(data)
+        data = compress_for_llm(data)
 
     if not check_and_increment(user_id):
         raise RateLimitedError
 
     provider = get_provider(settings.llm_provider)
-    log.info("Calling LLM  provider=%s  user=%s", settings.llm_provider, user_id)
-    raw = await provider.analyze_image(data, SALARY_PROMPT)
+    if pdf_text is not None:
+        log.info(
+            "Calling LLM with extracted PDF text  provider=%s  user=%s  chars=%d",
+            settings.llm_provider, user_id, len(pdf_text),
+        )
+        raw = await provider.chat(SALARY_TEXT_PROMPT.replace("__PAYSLIP_TEXT__", pdf_text))
+    else:
+        log.info("Calling LLM with image  provider=%s  user=%s", settings.llm_provider, user_id)
+        raw = await provider.analyze_image(data, SALARY_PROMPT)
     scrubbed = scrub(raw)
     log.info("LLM response received  chars=%d  user=%s", len(scrubbed), user_id)
 
